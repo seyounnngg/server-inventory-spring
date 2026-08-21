@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>사용자 관리 - 서버 인벤토리</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav><a th:href="@{/servers}">← 목록으로</a></nav>
+
+<h1>사용자 관리</h1>
+
+<div class="flash" th:if="${message}" th:text="${message}"></div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>아이디</th>
+        <th>이름</th>
+        <th>권한</th>
+        <th>변경</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.role}"></td>
+        <td>
+            <form method="post" th:action="@{/admin/users/{id}/role(id=${user.id})}" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <select name="role">
+                    <option value="VIEWER" th:selected="${user.role.name() == 'VIEWER'}">VIEWER</option>
+                    <option value="ADMIN" th:selected="${user.role.name() == 'ADMIN'}">ADMIN</option>
+                </select>
+                <button type="submit">변경</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
