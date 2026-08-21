@@ -2,9 +2,11 @@ package com.example.serverinventory.service;
 
 import com.example.serverinventory.domain.Role;
 import com.example.serverinventory.domain.User;
+import com.example.serverinventory.exception.DuplicateUsernameException;
 import com.example.serverinventory.exception.SelfRoleChangeException;
 import com.example.serverinventory.exception.UserNotFoundException;
 import com.example.serverinventory.repository.UserRepository;
+import com.example.serverinventory.web.dto.SignupForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,6 +18,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,5 +64,37 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.changeRole(999L, Role.ADMIN, "admin"))
                 .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    void signupShouldRejectDuplicateUsername() {
+        userService = new UserService(userRepository, passwordEncoder);
+        SignupForm form = new SignupForm();
+        form.setUsername("existing");
+        form.setPassword("password1");
+        form.setName("이름");
+        when(userRepository.existsByUsername("existing")).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.signup(form))
+                .isInstanceOf(DuplicateUsernameException.class);
+        verify(userRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void signupShouldHashPasswordAndDefaultToViewerRole() {
+        userService = new UserService(userRepository, passwordEncoder);
+        SignupForm form = new SignupForm();
+        form.setUsername("newbie");
+        form.setPassword("password1");
+        form.setName("새사람");
+        when(userRepository.existsByUsername("newbie")).thenReturn(false);
+        when(passwordEncoder.encode("password1")).thenReturn("hashed-password1");
+        when(userRepository.save(org.mockito.ArgumentMatchers.any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        User saved = userService.signup(form);
+
+        assertThat(saved.getPassword()).isEqualTo("hashed-password1");
+        assertThat(saved.getRole()).isEqualTo(Role.VIEWER);
     }
 }
