@@ -1,9 +1,12 @@
 package com.example.serverinventory.web;
 
+import com.example.serverinventory.domain.CheckResult;
 import com.example.serverinventory.domain.Server;
 import com.example.serverinventory.domain.User;
 import com.example.serverinventory.exception.ServerNotFoundException;
 import com.example.serverinventory.repository.UserRepository;
+import com.example.serverinventory.service.ServerAuditLogService;
+import com.example.serverinventory.service.ServerCheckService;
 import com.example.serverinventory.service.ServerService;
 import com.example.serverinventory.service.storage.StorageService;
 import com.example.serverinventory.web.dto.ServerForm;
@@ -26,23 +29,58 @@ public class ServerViewController {
     private final ServerService serverService;
     private final UserRepository userRepository;
     private final StorageService storageService;
+    private final ServerCheckService serverCheckService;
+    private final ServerAuditLogService auditLogService;
 
-    public ServerViewController(ServerService serverService, UserRepository userRepository, StorageService storageService) {
+    public ServerViewController(ServerService serverService, UserRepository userRepository, StorageService storageService,
+                                 ServerCheckService serverCheckService, ServerAuditLogService auditLogService) {
         this.serverService = serverService;
         this.userRepository = userRepository;
         this.storageService = storageService;
+        this.serverCheckService = serverCheckService;
+        this.auditLogService = auditLogService;
     }
 
     @GetMapping
     public String list(Model model) {
         model.addAttribute("servers", serverService.listActive());
+        model.addAttribute("latestChecks", serverCheckService.latestChecksByServerId());
         return "servers/list";
+    }
+
+    @GetMapping("/down")
+    public String downServers(Model model) {
+        var down = serverCheckService.latestChecksByServerId().values().stream()
+                .filter(check -> check.getResult() == CheckResult.DOWN)
+                .filter(check -> !check.getServer().isDeleted())
+                .map(check -> check.getServer())
+                .toList();
+        model.addAttribute("servers", down);
+        return "servers/down";
     }
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("server", serverService.get(id));
+        model.addAttribute("checks", serverCheckService.history(id));
+        model.addAttribute("auditLogs", auditLogService.history(id));
         return "servers/detail";
+    }
+
+    @PostMapping("/{id}/check")
+    public String checkOne(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        var check = serverCheckService.checkOne(id);
+        redirectAttributes.addFlashAttribute("message", "점검 완료: " + check.getResult());
+        return "redirect:/servers/" + id;
+    }
+
+    @PostMapping("/check-all")
+    public String checkAll(RedirectAttributes redirectAttributes) {
+        var results = serverCheckService.checkAllActive();
+        long upCount = results.stream().filter(c -> c.getResult() == CheckResult.UP).count();
+        redirectAttributes.addFlashAttribute("message",
+                "전체 점검 완료: %d대 중 %d대 UP".formatted(results.size(), upCount));
+        return "redirect:/servers";
     }
 
     @GetMapping("/new")

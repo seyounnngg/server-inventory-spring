@@ -55,3 +55,6 @@ label {
 .status-STOPPED { color: #c0392b; font-weight: bold; }
 .status-MAINTENANCE { color: #e67e22; font-weight: bold; }
 .status-DECOMMISSIONED { color: #7f8c8d; font-weight: bold; }
+
+.check-UP { color: #27ae60; font-weight: bold; }
+.check-DOWN { color: #c0392b; font-weight: bold; }
