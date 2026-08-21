@@ -1,60 +1,8 @@
 body {
     font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
-    max-width: 960px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    color: #222;
 }
 
-h1, h2 {
-    margin-bottom: 0.5rem;
-}
-
-nav a {
-    margin-right: 1rem;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-th, td {
-    border: 1px solid #ddd;
-    padding: 0.5rem;
-    text-align: left;
-}
-
-th {
-    background: #f5f5f5;
-}
-
-.error {
-    color: #c0392b;
-    font-size: 0.9rem;
-}
-
-.flash {
-    background: #eafaf1;
-    border: 1px solid #2ecc71;
-    padding: 0.5rem 1rem;
-    margin-bottom: 1rem;
-}
-
-form div {
-    margin-bottom: 0.75rem;
-}
-
-label {
-    display: inline-block;
-    min-width: 100px;
-}
-
-.status-RUNNING { color: #27ae60; font-weight: bold; }
-.status-STOPPED { color: #c0392b; font-weight: bold; }
-.status-MAINTENANCE { color: #e67e22; font-weight: bold; }
-.status-DECOMMISSIONED { color: #7f8c8d; font-weight: bold; }
-
-.check-UP { color: #27ae60; font-weight: bold; }
-.check-DOWN { color: #c0392b; font-weight: bold; }
+.status-RUNNING, .check-UP { background-color: #27ae60; color: #fff; }
+.status-STOPPED, .check-DOWN { background-color: #c0392b; color: #fff; }
+.status-MAINTENANCE { background-color: #e67e22; color: #fff; }
+.status-DECOMMISSIONED { background-color: #7f8c8d; color: #fff; }

@@ -15,7 +15,7 @@ public interface ServerCheckRepository extends JpaRepository<ServerCheck, Long> 
     Optional<ServerCheck> findLatestByServerId(Long serverId);
 
     @Query("""
-            select c from ServerCheck c
+            select c from ServerCheck c join fetch c.server s left join fetch s.owner
             where c.checkedAt = (
                 select max(c2.checkedAt) from ServerCheck c2 where c2.server.id = c.server.id
             )
