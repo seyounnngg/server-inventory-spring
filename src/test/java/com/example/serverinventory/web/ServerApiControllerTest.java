@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -44,7 +45,7 @@ class ServerApiControllerTest {
     @WithMockUser(roles = "VIEWER")
     void listShouldReturnServersForAuthenticatedUser() {
         Server server = new Server("lab-server-01", "192.168.0.10", 22, ServerStatus.RUNNING, null);
-        when(serverService.listActive()).thenReturn(List.of(server));
+        when(serverService.listActive(any())).thenReturn(new PageImpl<>(List.of(server)));
 
         restTestClient.get()
                 .uri("/api/servers")

@@ -11,9 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest(ServerViewController.class)
 @AutoConfigureRestTestClient
@@ -59,6 +63,8 @@ class ServerViewControllerSecurityTest {
     @Test
     @WithMockUser(roles = "VIEWER")
     void viewerCanListServers() {
+        when(serverService.listActive(any())).thenReturn(Page.empty());
+
         restTestClient.get()
                 .uri("/servers")
                 .exchange()

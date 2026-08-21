@@ -12,6 +12,9 @@ import com.example.serverinventory.service.storage.StorageService;
 import com.example.serverinventory.web.dto.ServerForm;
 import jakarta.validation.Valid;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -42,8 +45,10 @@ public class ServerViewController {
     }
 
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("servers", serverService.listActive());
+    public String list(@PageableDefault(size = 10) Pageable pageable, Model model) {
+        Page<Server> page = serverService.listActive(pageable);
+        model.addAttribute("page", page);
+        model.addAttribute("servers", page.getContent());
         model.addAttribute("latestChecks", serverCheckService.latestChecksByServerId());
         return "servers/list";
     }
