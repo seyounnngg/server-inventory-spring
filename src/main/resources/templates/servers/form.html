@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${serverId} != null ? '서버 수정' : '서버 등록'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<nav><a th:href="@{/servers}">← 목록으로</a></nav>
+
+<h1 th:text="${serverId} != null ? '서버 수정' : '서버 등록'"></h1>
+
+<form method="post"
+      th:action="${serverId} != null ? @{/servers/{id}(id=${serverId})} : @{/servers}"
+      th:object="${serverForm}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <input type="hidden" name="_method" value="put" th:if="${serverId} != null"/>
+
+    <div>
+        <label>호스트명</label>
+        <input type="text" th:field="*{hostname}"/>
+        <div class="error" th:if="${#fields.hasErrors('hostname')}" th:errors="*{hostname}"></div>
+    </div>
+    <div>
+        <label>IP 주소</label>
+        <input type="text" th:field="*{ipAddress}" placeholder="192.168.0.10"/>
+        <div class="error" th:if="${#fields.hasErrors('ipAddress')}" th:errors="*{ipAddress}"></div>
+    </div>
+    <div>
+        <label>포트</label>
+        <input type="number" th:field="*{port}" min="1" max="65535"/>
+        <div class="error" th:if="${#fields.hasErrors('port')}" th:errors="*{port}"></div>
+    </div>
+    <div>
+        <label>상태</label>
+        <select th:field="*{status}">
+            <option th:each="s : ${T(com.example.serverinventory.domain.ServerStatus).values()}"
+                    th:value="${s}" th:text="${s}"></option>
+        </select>
+        <div class="error" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+    </div>
+    <div><input type="submit" value="저장"/></div>
+</form>
+</body>
+</html>

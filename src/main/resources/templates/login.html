@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>로그인 - 서버 인벤토리</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<h1>서버 인벤토리 로그인</h1>
+
+<div class="error" th:if="${param.error}">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+<div class="flash" th:if="${param.logout}">로그아웃되었습니다.</div>
+<div class="flash" th:if="${param.signup}">회원가입이 완료되었습니다. 로그인해주세요.</div>
+
+<form method="post" th:action="@{/login}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <div><label>아이디</label><input name="username" type="text"/></div>
+    <div><label>비밀번호</label><input name="password" type="password"/></div>
+    <div><input type="submit" value="로그인"/></div>
+</form>
+
+<p>계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+</body>
+</html>

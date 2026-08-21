@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>404 - 서버 인벤토리</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<h1>404 Not Found</h1>
+<p th:text="${message}"></p>
+<a th:href="@{/servers}">목록으로 돌아가기</a>
+</body>
+</html>
