@@ -22,7 +22,15 @@
 
 <div class="flash" th:if="${message}" th:text="${message}"></div>
 
-<p sec:authorize="hasRole('ADMIN')"><a th:href="@{/servers/new}">+ 서버 등록</a></p>
+<p>
+    <a th:href="@{/servers/down}">DOWN 서버만 보기</a>
+    <span sec:authorize="hasRole('ADMIN')"> | <a th:href="@{/servers/new}">+ 서버 등록</a></span>
+</p>
+
+<form sec:authorize="hasRole('ADMIN')" method="post" th:action="@{/servers/check-all}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">전체 서버 일괄 점검</button>
+</form>
 
 <table>
     <thead>
@@ -33,6 +41,7 @@
         <th>포트</th>
         <th>상태</th>
         <th>담당자</th>
+        <th>마지막 점검</th>
     </tr>
     </thead>
     <tbody>
@@ -43,6 +52,13 @@
         <td th:text="${server.port}"></td>
         <td><span th:class="'status-' + ${server.status}" th:text="${server.status}"></span></td>
         <td th:text="${server.owner != null ? server.owner.name : '-'}"></td>
+        <td>
+            <span th:with="check=${latestChecks.get(server.id)}"
+                  th:if="${check != null}"
+                  th:class="'check-' + ${check.result}"
+                  th:text="${check.result}"></span>
+            <span th:if="${latestChecks.get(server.id) == null}">-</span>
+        </td>
     </tr>
     </tbody>
 </table>

@@ -2,6 +2,8 @@ package com.example.serverinventory.web;
 
 import com.example.serverinventory.config.WebSecurityConfig;
 import com.example.serverinventory.repository.UserRepository;
+import com.example.serverinventory.service.ServerAuditLogService;
+import com.example.serverinventory.service.ServerCheckService;
 import com.example.serverinventory.service.ServerService;
 import com.example.serverinventory.service.storage.StorageService;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,12 @@ class ServerViewControllerSecurityTest {
 
     @MockitoBean
     private StorageService storageService;
+
+    @MockitoBean
+    private ServerCheckService serverCheckService;
+
+    @MockitoBean
+    private ServerAuditLogService auditLogService;
 
     @Test
     @WithMockUser(roles = "VIEWER")
