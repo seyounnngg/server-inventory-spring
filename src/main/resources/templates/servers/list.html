@@ -63,5 +63,11 @@
     </tr>
     </tbody>
 </table>
+
+<p th:if="${page.totalPages > 1}">
+    <a th:if="${page.hasPrevious()}" th:href="@{/servers(page=${page.number - 1})}">← 이전</a>
+    <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}"></span>
+    <a th:if="${page.hasNext()}" th:href="@{/servers(page=${page.number + 1})}">다음 →</a>
+</p>
 </body>
 </html>

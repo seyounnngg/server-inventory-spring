@@ -7,9 +7,13 @@ import com.example.serverinventory.service.ServerService;
 import com.example.serverinventory.web.dto.ServerForm;
 import com.example.serverinventory.web.dto.ServerResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -41,13 +46,33 @@ public class ServerApiController {
     }
 
     @GetMapping
-    public CollectionModel<EntityModel<ServerResponse>> list() {
-        List<EntityModel<ServerResponse>> servers = serverService.listActive().stream()
+    public PagedModel<EntityModel<ServerResponse>> list(@PageableDefault(size = 10) Pageable pageable) {
+        Page<Server> page = serverService.listActive(pageable);
+        List<EntityModel<ServerResponse>> content = page.getContent().stream()
                 .map(this::toModel)
                 .toList();
 
-        return CollectionModel.of(servers,
-                linkTo(methodOn(ServerApiController.class).list()).withSelfRel());
+        PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(
+                page.getSize(), page.getNumber(), page.getTotalElements(), page.getTotalPages());
+
+        PagedModel<EntityModel<ServerResponse>> model = PagedModel.of(content, metadata,
+                Link.of(pageUri(page.getNumber(), page.getSize())).withSelfRel());
+
+        if (page.hasPrevious()) {
+            model.add(Link.of(pageUri(page.getNumber() - 1, page.getSize())).withRel("prev"));
+        }
+        if (page.hasNext()) {
+            model.add(Link.of(pageUri(page.getNumber() + 1, page.getSize())).withRel("next"));
+        }
+        return model;
+    }
+
+    private String pageUri(int page, int size) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .replaceQueryParam("page", page)
+                .replaceQueryParam("size", size)
+                .build()
+                .toUriString();
     }
 
     @GetMapping("/{id}")
@@ -81,7 +106,7 @@ public class ServerApiController {
     private EntityModel<ServerResponse> toModel(Server server) {
         EntityModel<ServerResponse> model = EntityModel.of(ServerResponse.from(server),
                 linkTo(methodOn(ServerApiController.class).detail(server.getId())).withSelfRel(),
-                linkTo(methodOn(ServerApiController.class).list()).withRel("servers"));
+                linkTo(ServerApiController.class).withRel("servers"));
 
         if (hasAdminRole()) {
             model.add(Link.of("/servers/" + server.getId() + "/edit", "edit"));

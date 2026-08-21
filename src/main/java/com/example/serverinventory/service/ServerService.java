@@ -7,6 +7,8 @@ import com.example.serverinventory.exception.ServerNotFoundException;
 import com.example.serverinventory.repository.ServerRepository;
 import com.example.serverinventory.service.storage.StorageService;
 import com.example.serverinventory.web.dto.ServerForm;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +34,10 @@ public class ServerService {
 
     public List<Server> listActive() {
         return serverRepository.findAllByDeletedAtIsNull();
+    }
+
+    public Page<Server> listActive(Pageable pageable) {
+        return serverRepository.findAllByDeletedAtIsNull(pageable);
     }
 
     public Server get(Long id) {
