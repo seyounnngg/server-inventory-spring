@@ -3,6 +3,8 @@ package com.example.serverinventory.service;
 import com.example.serverinventory.domain.Role;
 import com.example.serverinventory.domain.User;
 import com.example.serverinventory.exception.DuplicateUsernameException;
+import com.example.serverinventory.exception.SelfRoleChangeException;
+import com.example.serverinventory.exception.UserNotFoundException;
 import com.example.serverinventory.repository.UserRepository;
 import com.example.serverinventory.web.dto.SignupForm;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -48,5 +52,19 @@ public class UserService implements UserDetailsService {
                 Role.VIEWER
         );
         return userRepository.save(user);
+    }
+
+    public List<User> listAll() {
+        return userRepository.findAll();
+    }
+
+    @Transactional
+    public void changeRole(Long targetUserId, Role newRole, String actorUsername) {
+        User target = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new UserNotFoundException(targetUserId));
+        if (target.getUsername().equals(actorUsername)) {
+            throw new SelfRoleChangeException();
+        }
+        target.setRole(newRole);
     }
 }
